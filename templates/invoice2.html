@@ -1,0 +1,206 @@
+{% comment %}<!DOCTYPE html> {% endcomment %}
+<html>
+
+<head>
+    <title>Krishiv Foods LLC</title>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body style="font-family: 'Roboto', sans-serif;">
+    <div style="max-width: 800px;margin: 0 auto;">
+        <table cellpadding="0" cellspacing="0" style="border: 0;">
+            <tr>
+                <td style="width: 100%;padding-bottom: 30px;">
+                    <table cellpadding="0" cellspacing="0" style="border: 0;">
+                        <tr>
+                            <td style="width: 70%;">
+                                <a href="https://krishivfoods.com/" target="_blank" style="width: 200px; display: inline-block;vertical-align: middle;padding-right: 10px;"><img src={{krishiv_src}} alt="logo" style="width: 100%;max-width: 200px;"></a>
+                                <div style="display: inline-block; vertical-align: top;">
+                                    <address style="font-style: normal; line-height: 22px; font-size: 14px;">
+                                        KRISHIV FOODS, LLC<br />
+                                        802 Greenleaf Avenue<br />
+                                        Elk Grove Village, 60007<br />
+                                        Email: Sales@krishivfoods.com<br />
+                                    </address>
+                                    <a href="https://krishivfoods.com/" target="_blank" class="header-web" style="font-size: 14px;">www.krishivfoods.com</a>
+                                </div>
+                                <p style="margin: 0;padding-top: 8px;font-style: normal;line-height: 22px;font-size: 14px;">(P) 833 - KRISHIV (574 - 7448)<span style="padding-right: 15px;"></span>(F) 224 - 769 - 7988</p>
+                            </td>
+                            <td style="width: 30%;vertical-align: top;">
+                                <h1 style="margin-top: 0;margin-bottom: 15px;font-size: 28px;">SALES ORDER</h1>
+                                <table style="border: 1px solid #000;width: 100%;max-width: 100%;border-collapse: collapse;table-layout: fixed;">
+                                    <tr>
+                                        <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Date</th>
+                                        <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">P.O. No.</th>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: center;border: 1px solid #000;padding: 10px;font-size: 14px;">{{ date|date:"m-d-Y"}}</td>
+                                        <td style="text-align: center;border: 1px solid #000;padding: 10px;font-size: 14px;">{{ invoice_no }}</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 100%;padding-bottom: 30px;">
+                    <table cellpadding="0" cellspacing="0" style="border: 0;">
+                        <tr>
+                            <td style="padding-right: 10px;">
+                                <table style="width: 100%;max-width: 100%;border-collapse: collapse;table-layout: fixed;">
+                                    <tr>
+                                        <td>
+                                            <table style="width: 100%;border: 1px solid #000;border-collapse: collapse;table-layout: fixed;">
+                                                <tr>
+                                                    <th style="background-color: #ccc;text-align: left;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Bill To</th>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 15px;">
+                                                        <address style="font-style: normal;line-height: 22px;font-size: 14px;">
+                                                            {{store_name}}<br />
+                                                            {{customer_name}}<br />
+                                                            {{billing_address}}<br />
+                                                            {{billing_city}}, {{billing_state}} {{billing_zipcode}}<br />
+                                                            <br />
+                                                            (M) {{mobilenumber}}
+                                                        </address>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td style="padding-left: 10px;">
+                                <table style="width: 100%;max-width: 100%;border-collapse: collapse;table-layout: fixed;">
+                                    <tr>
+                                        <td>
+                                            <table style="width: 100%;border: 1px solid #000;border-collapse: collapse;">
+                                                <tr>
+                                                    <th style="background-color: #ccc;text-align: left;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Ship To</th>
+                                                </tr>
+                                                <tr>
+                                                    <td style="padding: 15px;">
+                                                        <address style="font-style: normal;line-height: 22px;font-size: 14px;">
+                                                            {{store_name}}<br />
+                                                            {{customer_name}}<br />
+                                                            {{shipping_address}}<br />
+                                                            {{shipping_city}}, {{shipping_state}} {{shipping_zipcode}}<br/>
+                                                            <br />
+                                                            (M) {{mobilenumber}}
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-bottom: 15px;">
+                    <table cellpadding="0" cellspacing="0" style="border-collapse: collapse;width: 100%;border: 0;">
+                        <tr>
+                            <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">P.O. No.</th>
+                            <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Terms</th>
+                            <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Rep</th>
+                            <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Ship Date</th>
+                            <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Ship Via</th>
+                            <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Due Date</th>
+                            <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Account #</th>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;border: 1px solid #000;padding: 10px;font-size: 14px;">{{po_no}}</td>
+                            <td style="text-align: center;border: 1px solid #000;padding: 10px;font-size: 14px;">{{ terms }}</td>
+                            <td style="text-align: center;border: 1px solid #000;padding: 10px;font-size: 14px;">{{ rep }}</td>
+                            <td style="text-align: center;border: 1px solid #000;padding: 10px;font-size: 14px;">{{ ship_date|date:"m-d-Y" }}</td>
+                            <td style="text-align: center;border: 1px solid #000;padding: 10px;font-size: 14px;">{{ delivery_method }}</td>
+                            <td style="text-align: center;border: 1px solid #000;padding: 10px;font-size: 14px;">{{ due_date|date:"m-d-Y" }}</td>
+                            <td style="text-align: center;border: 1px solid #000;padding: 10px;font-size: 14px;">{{ account_num }}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-bottom: 30px;">
+                    <table cellpadding="0" cellspacing="0" style="border-collapse: collapse;width: 100%;border: 0;">
+                        <tr>
+                            <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Item No.</th>
+                            <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Category</th>
+                            <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Description</th>
+                            <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Ordered</th>
+                            <!-- <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Scan Quantity</th> -->
+                            <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Price</th>
+                            <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 10px;font-weight: bold;font-size: 14px;">Amount</th>
+                        </tr>
+                        {% for product in products %}
+                        {% if forloop.counter|divisibleby:2 %}<tr style="background-color: #e0dddd;">  {% else %}<tr>{% endif %}
+                            <td style="text-align: left;border: 1px solid #000;padding: 5px;font-size: 14px;">{{product.item_no}}</td>
+                            <td style="text-align: left;border: 1px solid #000;padding: 5px;font-size: 14px;">{{ product.category}}</td>
+                            <td style="text-align: left;border: 1px solid #000;padding: 5px;font-size: 14px;">{{ product.description}}</td>
+                            <td style="text-align: center;border: 1px solid #000;padding: 5px;font-size: 14px;">{{ product.qty}}</td>
+                            <!-- <td style="text-align: center;border: 1px solid #000;padding: 5px;font-size: 14px;">{{ product.scan_qty}}</td> -->
+                            <td style="text-align: center;border: 1px solid #000;padding: 5px;font-size: 14px;">${{ product.price }}</td>
+                            <td style="text-align: center;border: 1px solid #000;padding: 5px;font-size: 14px;">${{ product.amount }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% comment %} <tr>
+                            <td style="text-align: left;border: 1px solid #000;padding: 5px;font-size: 14px;">540403</td>
+                            <td style="text-align: left;border: 1px solid #000;padding: 5px;font-size: 14px;">Chutney</td>
+                            <td style="text-align: left;border: 1px solid #000;padding: 5px;font-size: 14px;">All In One Chutney (12BTLS x 220GMS) ***BUY 5
+                                GET 1 FREE***</td>
+                            <td style="text-align: center;border: 1px solid #000;padding: 5px;font-size: 14px;">1</td>
+                            <td style="text-align: center;border: 1px solid #000;padding: 5px;font-size: 14px;">21.50</td>
+                            <td style="text-align: center;border: 1px solid #000;padding: 5px;font-size: 14px;">21.50</td>
+                        </tr> {% endcomment %}
+                        <tr>
+                            <td style="width: 100%;" colspan="6">
+                                <table cellpadding="0" cellspacing="0" style="border-collapse: collapse;width: 100%;border-right: 1px solid #000;border-left: 1px solid #000;border-bottom: 1px solid #000;">
+                                    <tr>
+                                        <td style="width: 65%;">
+                                            <strong style="padding: 10px 2.5px 10px 10px;font-size: 14px;">Total Weight :</strong><span style="padding: 10px 10px 10px 2.5px;font-size: 14px;">{{weight}} Lbs</span>
+                                        </td>
+                                        <td style="width: 35%;">
+                                            <table cellpadding="0" cellspacing="0" style="border-collapse: collapse;width: 100%;border: 0;">
+                                                <tr>
+                                                    <th style="width: 40%;text-align: left;font-size: 14px;padding: 10px;border-left: 1px solid #000;">Total</th>
+                                                    <td style="width: 60%;text-align: right;font-size: 14px;padding: 10px;">${{ total }}</td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td style="width: 100%;padding-bottom: 30px;">
+                    <table cellpadding="0" cellspacing="0" style="border-collapse: collapse;width: 100%;border: 0;">
+                        <tr>
+                            <td style="width: 70%;">
+                                <p style="font-size: 14px;margin: 0;padding-bottom: 5px;">* CHECK PAYABLE TO KRISHIV FOODS, LLC.</p>
+                                <p style="font-size: 14px;margin: 0;padding-bottom: 5px;">* 2% INTEREST PER MONTH WILL BE CHARGED ON PAST DUE AMOUNTS.</p>
+                                <p style="font-size: 14px;margin: 0;padding-bottom: 5px;">* CUSTOMERS ARE LIABLE FOR ANY LEGAL CHARGES.</p>
+                                <p style="font-size: 14px;margin: 0;padding-bottom: 5px;">* NO RETURNS ON SALES AFTER 14 DAYS.</p>
+                                <p style="font-size: 14px;margin: 0;padding-bottom: 5px;">* ALL UNPAID MERCHANDISE IS OUR PROPERTY UNTIL PAID.</p>
+                                <p style="font-size: 14px;margin: 0;padding-bottom: 5px;">* $50 CHARGE ON ALL RETURNED CHECKS.</p>
+                            </td>
+                            <td style="width: 30%;text-align: right;padding-left: 15px;">
+                                <a href="javascript:void(0)" style="width: 200px; display: inline-block;vertical-align: middle;"><img src="{{ramdev_src}}" alt="logo" style="width: 100%;max-width: 200px;"></a>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>

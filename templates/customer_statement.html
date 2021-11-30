@@ -1,0 +1,192 @@
+<html>
+<head>
+<style>
+    @page {
+        size: letter portrait;
+        @frame header_frame {           /* Static frame */
+            -pdf-frame-content: header_content;
+            left: 30pt; width: 1220pt; top: 5pt; height: 600pt;
+        }
+        @frame col1_frame {             /* Content frame 1 */
+            left: 30pt; width: 1220pt; top: 235pt; height: 470pt;
+        }
+        @frame footer_frame {           /* Static frame */
+            -pdf-frame-content: footer_content;
+            left: 30pt; width: 1220pt; top: 698pt; height: 300pt;
+        }
+    }
+    .leftBorderOnly {
+        border-left: 1px solid rgb(0, 0, 0);
+    }
+
+    .rightBorderOnly {
+        border-right: 1px solid rgb(0, 0, 0);
+    }
+    .topBorderOnly {
+        border-top: 1px solid rgb(0, 0, 0);
+    }
+    .bottomBorderOnly {
+        border-bottom: 1px solid  rgb(0, 0, 0);
+    }
+    .fullBorder {
+        border-top: 1px solid  rgb(0, 0, 0);
+        border-left: 1px solid  rgb(0, 0, 0);
+        border-right: 1px solid  rgb(0, 0, 0);
+        border-bottom: 1px solid  rgb(0, 0, 0);
+    }
+    td,th{
+        line-height: 0 !important;
+        vertical-align: middle !important;
+    }
+    
+</style>
+<head>
+<body>
+    
+    <div id="header_content">
+        <table border="0" width="45%" hegiht="10%">
+            <tr>
+                <td>
+                    <img style="margin-left: 3px;" width="160" height="100" src="brand-logo.png" alt="logo">
+                </td>
+                <td width="230">
+                    <address style="font-style: normal; line-height: 18px;padding-top: 80%; font-size: 14px;">
+                        Krishiv Foods, LLC.<br />
+                        802 Greenleaf Avenue<br />
+                        Elk Grove Village, 60007<br />
+                        Email: Sales@krishivfoods.com<br />
+                        www.krishivfoods.com<br />
+                        <img style="margin-left: 3px;padding-right: 3px;" width="10" height="10" src="phone.png" alt="logo"><label style="color: azure;">* </label> 833 - KRISHIV (574 - 7448)<br />
+                        <img style="margin-left: 3px;padding-right: 3px;" width="10" height="10" src="fax.png" alt="logo"><label style="color: azure;">* </label> 224 - 769 - 7988
+                    </address>
+                </td>
+                <td width="170">
+                    <table  border="0">
+                        <tr>
+                            <td  align="center" style="font-size: 18px;font-weight: bold;padding-bottom: 4px;">Customer Statement</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 4px;font-weight: bold;font-size: 14px;">Date</th>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;border: 1px solid #000;padding: 5px;font-size: 14px;">{{ current_date|date:"m-d-Y"}}</td>
+                        </tr>
+                    </table>
+                </td>
+                
+            </tr>
+        </table>
+    
+       
+        <table width="46%" border="0" style="margin-top:6px;">
+            <tr>
+                <td style="padding-right: 10px;">
+                    <table>
+                        <tr>
+                            <td>
+                                <table style="width: 100%;border: 1px solid #000;border-collapse: collapse;">
+                                    <tr>
+                                        <th style="background-color: #ccc;text-align: left;border: 1px solid #000;padding-top: 3px;padding-bottom: 1px;margin-bottom: 5px;margin-left: 5px;font-weight: bold;font-size: 15px;">Statement For</th>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 2px;">
+                                            <address style="font-style: normal;line-height: 20px;font-size: 14px;margin-left: 3px;margin-top: 2px;">
+                                                {{store_name}}<br />
+                                                {{customer_name}}<br />
+                                                {{billing_address}}<br />
+                                                {{billing_city}}, {{billing_state}} {{billing_zipcode}}<br />
+                                                (P) {{mobilenumber}}
+                                            </address>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+       
+        <table width="45%" border="1" style="margin-top:7px;">
+            <tr>
+                <th width="21%" style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 0px;font-weight: bold;font-size: 14px;">Date</th>
+                <th width="55%" style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 3px;font-weight: bold;font-size: 14px;">Transaction</th>
+                <th width="25.5%" style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 3px;font-weight: bold;font-size: 14px;">Amount</th>
+                <th width="25.5%" style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 3px;font-weight: bold;font-size: 14px;">Balance</th>
+
+            </tr> 
+        </table>
+    </div>
+  
+    <table width="45%" style="border-bottom: 1pt;">
+        {% for row in row_data %}
+            <tr>
+                <td width="21%" class="leftBorderOnly rightBorderOnly" style="text-align: left;padding-left: 3px;padding-bottom: 0px;padding-top: 0.8px;font-size: 13px;height: 22px;">{{row.transaction_date|date:"m-d-Y"}}</td>
+                <td class="leftBorderOnly rightBorderOnly" style="width: 55%;padding-left: 3px;font-size: 13px;max-width:200px; min-width:200px;padding-bottom: 0px;padding-top: 0.8px;height:22px;">
+                    <div style="overflow: hidden;">{{row.transaction_data}}</div>
+                </td>
+                <td width="25.5%" class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 0px;font-size: 13px;height: 22px;padding-left: 3px;padding-bottom: 0px;padding-top: 0.8px;">${{ row.amount|floatformat:2 }}</td>
+                <td width="25.5%" class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 0px;font-size: 13px;height: 22px;padding-left: 3px;padding-bottom: 0px;padding-top: 0.8px;">${{ row.balance|floatformat:2 }}</td>
+                
+                </tr>
+        {% endfor %}
+        {% for i in loop_times %} 
+            
+            <tr>
+                <td class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 8.2px;font-size: 13px;"> <label style="display: none;">{{ forloop.counter }}</label></td>
+                <td class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 5px;font-size: 13px;height: 22px"><label style="display: none;">Garam</label></td>
+                <td class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 5px;font-size: 13px;"> </td>
+                <td class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 5px;font-size: 13px;"> </td>
+            </tr>
+        {% endfor %}  
+    </table>
+            
+    <table width="45%" style="border-bottom: 1pt;">
+        <tr style="height: 30px">
+            <td class="fullBorder" style="margin-left: 6px;padding-top: 4px;padding-bottom: 3px;"><b> CURRENT </b></td>
+            <td class="fullBorder" style="margin-left: 6px;padding-top: 4px;padding-bottom: 3px;"><b> 1-30 DAYS PAST DUE </b></td>
+            <td class="fullBorder" style="margin-left: 6px;padding-top: 4px;padding-bottom: 3px;"><b> 31-60 DAYS PAST DUE </b></td>
+            <td class="fullBorder" style="margin-left: 6px;padding-top: 4px;padding-bottom: 3px;"><b> 61-90 DAYS PAST DUE </b></td>
+            <td class="fullBorder" style="margin-left: 6px;padding-top: 4px;padding-bottom: 3px;"><b> OVER 90 DAYS PAST DUE </b></td>
+        </tr>
+        <tr style="height: 38.3px">
+            <td class="fullBorder" style="margin-left: 6px;padding-top: 4px;padding-bottom: 3px;">{{ current_total }}</td>
+            <td class="fullBorder" style="margin-left: 6px;padding-top: 4px;padding-bottom: 3px;">{{ days_30 }}</td>
+            <td class="fullBorder" style="margin-left: 6px;padding-top: 4px;padding-bottom: 3px;">{{ days_60 }}</td>
+            <td class="fullBorder" style="margin-left: 6px;padding-top: 4px;padding-bottom: 3px;">{{ days_90 }}</td>
+            <td class="fullBorder" style="margin-left: 6px;padding-top: 4px;padding-bottom: 3px;">{{ over_days90 }}</td>
+        </tr>
+    </table>
+            
+        
+        
+    
+    <div id="footer_content">
+            <table width="45%" border="0" style="margin-top: 4px;">
+                <tr class="topBorderOnly" >
+                    <td style="width: 40%;">
+                        
+                        <address style="line-height: 12px; font-size: 10px;margin-left: 3px;display: none;">
+                            * CHECK PAYABLE TO KRISHIV FOODS, LLC.<br />
+                            * 2% INTEREST PER MONTH WILL BE CHARGED ON PAST<br /> 
+                            <label style="color: azure;">* </label> <label>DUE AMOUNTS</label><br /> 
+                            * CUSTOMERS ARE LIABLE FOR ANY LEGAL CHARGES.<br />
+                    </address>
+                    </td>
+                    <td style="width: 40%;">
+                        <address style="line-height: 12px; font-size: 10px;margin-left: 3px;display: none;">
+                            * NO RETURNS ON SALES AFTER 14 DAYS.<br />
+                            * ALL UNPAID MERCHANDISE IS OUR PROPERTY UNTIL<br />
+                            <label style="color: azure;">* </label> <label>PAID.</label><br /> 
+                            * $50 CHARGE ON ALL RETURNED CHECKS.<br />
+                    </address>
+                    </td>
+                    <td style="width: 20%;">
+                        <img src="ramdev-logo.jpeg" alt="logo" height="100px" width= "180px">
+                    </td>
+                </tr>
+            </table>
+            Page <pdf:pagenumber> of <pdf:pagecount>
+    </div>
+</body>
+</html>
