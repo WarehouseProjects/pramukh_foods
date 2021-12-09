@@ -63,7 +63,7 @@
                 <td width="170">
                     <table  border="0">
                         <tr>
-                            <td colspan='2' align="center" style="font-size: 18px;font-weight: bold;padding-bottom: 4px;">{{page_title}}</td>
+                            <td colspan='2' align="center" style="font-size: 18px;font-weight: bold;padding-bottom: 4px;">DELIVERY SHEET</td>
                         </tr>
                         <tr>
                             <th style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 4px;font-weight: bold;font-size: 14px;">Date</th>
@@ -167,8 +167,8 @@
             <th width="11%" style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 0px;font-weight: bold;font-size: 14px;">Category</th>
             <th width="55%" style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 3px;font-weight: bold;font-size: 14px;">Description</th>
             <th width="6.5%" style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 3px;font-weight: bold;font-size: 14px;">Qty</th>
-            <th width="8%" style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 3px;font-weight: bold;font-size: 14px;">Price</th>
-            <th width="11%" style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 3px;font-weight: bold;font-size: 14px;">Amount</th>
+            <th width="19%" style="background-color: #ccc;text-align: center;border: 1px solid #000;padding: 3px;font-weight: bold;font-size: 14px;">Verification</th>
+            
         </tr> 
         </table>
     </div>
@@ -183,8 +183,8 @@
                     <div style="overflow: hidden;">{{ product.description }}</div>
                 </td>
                 <td  width="6.5%"class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 0px;font-size: 13px;height: 22px;padding-left: 3px;padding-bottom: 0px;padding-top: 0.8px;">{{ product.qty}}</td>
-                <td width="8%" class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 0px;font-size: 13px;height: 22px;padding-left: 3px;padding-bottom: 0px;padding-top: 0.8px;">${{ product.price }}</td>
-                <td width="11%" class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 0px;font-size: 13px;height: 22px;padding-left: 3px;padding-bottom: 0px;padding-top: 0.8px;">${{ product.amount }}</td>
+                <td width="8%" class="" style="text-align: left;padding: 0px;font-size: 13px;height: 22px;padding-left: 3px;padding-bottom: 0px;padding-top: 0.8px;"> </td>
+                <td width="11%" class="rightBorderOnly" style="text-align: left;padding: 0px;font-size: 13px;height: 22px;padding-left: 3px;padding-bottom: 0px;padding-top: 0.8px;"> </td>
             </tr>
             {% if products|length == forloop.counter %}
                 {% for i in loop_times %}
@@ -194,8 +194,8 @@
                             <td class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 5px;font-size: 13px;height: 22px"><label style="display: none;">Garam</label></td>
                             <td class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 5px;font-size: 13px;"> </td>
                             <td class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 5px;font-size: 13px;"> </td>
-                            <td class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 5px;font-size: 13px;"> </td>
-                            <td class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 5px;font-size: 13px;"> </td>
+                            <td class="" style="text-align: left;padding: 5px;font-size: 13px;"> </td>
+                            <td class="rightBorderOnly" style="text-align: left;padding: 5px;font-size: 13px;"> </td>
                         </tr>
                     {% else %}
                         <tr  style="font-size: 13px;height: 44px;">

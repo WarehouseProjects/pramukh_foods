@@ -723,6 +723,7 @@ class Search(ViewSet):
         if verfication_status in [1,0,'1','0',True,False]:
             order_qs = order_qs.filter(verfication_status=verfication_status)
         
+        order_qs = order_qs.order_by('-id')
         total_record = len(order_qs)
         list_with_pagelimit = order_qs[start:end]
         filter_record = len(list_with_pagelimit)
@@ -2474,7 +2475,7 @@ class OrderDisplayFromCustomerid(ViewSet):
                         'total_record':total_record
                         },status=status.HTTP_200_OK)
 
-class Credit_Memo(ViewSet):
+class CreditMemoView(ViewSet):
 
     def create(self,request,*args,**kwargs):
         customer_id = request.data.get('customer_id')
@@ -2730,7 +2731,7 @@ class Credit_Memo(ViewSet):
             all_data = all_data.order_by(order_by)
         if sort_field == "cm_no":
             reverse_rows = True if sort_type == 'desc' else False
-            all_data = sorted(all_data, key=lambda CreditMemo: int(CreditMemo.cm_no[3:]),reverse=reverse_rows)
+            all_data = sorted(all_data, key=lambda CreditMemo: CreditMemo.cm_no.replace(" ", ""),reverse=reverse_rows)
 
         total_record = len(all_data)
         list_with_page_limit = all_data[start:end]

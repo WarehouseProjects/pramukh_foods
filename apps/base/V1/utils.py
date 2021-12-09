@@ -104,15 +104,14 @@ def get_order_pdfdata(order_obj,pdf_type=None):
                 order_date = order.order.created_at.date()
 
                 if order_date < old_data_date:
-                    price_val = "%.2f" % round(order.price, 2)
+                    price_val = "{:,.2f}".format(order.price)
                 else:
-                    price_val = "%.2f" % round(order.net_price, 2)
-
+                    price_val = "{:,.2f}".format(order.net_price)
                 products_data_for_pdf.append({'product_id':product_obj.id,'category':product_obj.category,
                                                     'description':order.order_product_name,'price':price_val,
                                                     'scan_qty':order.scan_quantity,
                                                     'qty':int(order.quantity) if order.quantity.is_integer() else order.quantity,
-                                                    'amount':"%.2f" % round(order.product_amount, 2),
+                                                    'amount':"{:,.2f}".format(order.product_amount),
                                                     "item_no":product_obj.item_no
                                                     })
             else:
@@ -121,15 +120,15 @@ def get_order_pdfdata(order_obj,pdf_type=None):
                 order_date = order.order.created_at.date()
 
                 if order_date < old_data_date:
-                    price_val = "%.2f" % round(order.price, 2)
+                    price_val = "{:,.2f}".format(order.price)
                 else:
-                    price_val = "%.2f" % round(order.net_price, 2)
+                    price_val = "{:,.2f}".format(order.net_price)
 
                 negative_product_data.append({'product_id':product_obj.id,'category':product_obj.category,
                                                     'description':order.order_product_name,'price':price_val,
                                                     'scan_qty':order.scan_quantity,
                                                     'qty':int(order.quantity) if order.quantity.is_integer() else order.quantity,
-                                                    'amount':"%.2f" % round(order.product_amount, 2),
+                                                    'amount':"{:,.2f}".format(order.product_amount),
                                                     "item_no":product_obj.item_no
                                                     })
         
@@ -182,8 +181,8 @@ def get_order_pdfdata(order_obj,pdf_type=None):
             pdf_data['mobilenumber'] = ''
 
         pdf_data['products']= products_data_for_pdf + negative_product_data + credit_applied_pdf_data
-        pdf_data['weight']= "%.2f" % round(sum_of_weights, 2)
-        pdf_data['total'] = "%.2f" % round(order_obj.amount, 2)
+        pdf_data['weight']= "{:,.2f}".format(sum_of_weights)
+        pdf_data['total'] = "{:,.2f}".format(order_obj.amount)
         pdf_data['due_date'] = order_obj.due_date
         pdf_data['ship_date']= order_obj.delivery_date
         pdf_data['account_num'] = customer_obj.account_num.replace("-", "") if customer_obj.account_num else '-'
@@ -300,14 +299,13 @@ def create_pdf(**kwagrs):
         myfile = ContentFile(result.getvalue())
 
         if pdf_type == "sales_pdf":
-            print("new..")
             order_obj.sales_pdf.save(filename, myfile)
             pdf_url = request.build_absolute_uri(order_obj.sales_pdf.url)
         elif pdf_type == "invoice_pdf" :
             order_obj.invoice_pdf.save(filename, myfile)
             pdf_url = request.build_absolute_uri(order_obj.invoice_pdf.url)
         elif pdf_type == "credit_memo_pdf" :
-            extra_rows = 26
+            extra_rows = 25
             pdf_data['loop_times'] = range(1, extra_rows+1)
             # Process of Creating PDF
             template=get_template(settings.BASE_DIR +'/templates/credit_memo_pdf.html')
@@ -322,11 +320,22 @@ def create_pdf(**kwagrs):
             credit_obj.credit_memo_pdf.save(filename, myfile)
             pdf_url = request.build_absolute_uri(credit_obj.credit_memo_pdf.url)
 
-            base_pdf_path = settings.BASE_DIR
-            fullname = os.path.join(base_pdf_path, pdf_filename)
+        elif pdf_type == "delivery_sheet_pdf":
+            template=get_template(settings.BASE_DIR +'/templates/delivery_sheet_pdf.html')
+            result = BytesIO()
+            html = template.render(pdf_data)
+            pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result,encoding='UTF-8')
+            f = open(filename,"wb")
+            f.write(result.getvalue())
+            f.close()
+            myfile = ContentFile(result.getvalue())
+            order_obj.delivery_sheet_pdf.save(filename, myfile)
+            pdf_url = request.build_absolute_uri(order_obj.delivery_sheet_pdf.url)
 
-            if os.path.exists(fullname):
-                os.remove(fullname)
+        base_pdf_path = settings.BASE_DIR
+        fullname = os.path.join(base_pdf_path, filename)
+        if os.path.exists(fullname):
+            os.remove(fullname)
 
         response = {
             'status_code': True,
@@ -367,7 +376,14 @@ def send_pdf_mail(**kwagrs):
         message = MIMEMultipart()
         message['subject'] = email_subject
         message.attach(MIMEText(email_body, "plain"))
-        binary_pdf = open(filename, 'rb')
+        try:
+            binary_pdf = open(filename, 'rb')
+        except Exception as e:
+            print("Exception")
+            pdf_filename = filename 
+            pdf_path = settings.MEDIA_ROOT + "/pdf"
+            pdf_filename = os.path.join(pdf_path, pdf_filename)
+            binary_pdf = open(pdf_filename, 'rb')
 
         payload = MIMEBase('application/pdf', 'octate-stream', Name=filename + '.pdf')
         payload.set_payload((binary_pdf).read())
@@ -384,14 +400,14 @@ def send_pdf_mail(**kwagrs):
             server.login(email_form, password)
             server.sendmail(email_form, recipient_list, text)
 
-        pdf_filename = filename 
-        pdf_path = settings.BASE_DIR
-        fullname = os.path.join(pdf_path, pdf_filename)
-        if os.path.exists(fullname):
-            os.remove(fullname)
+        # pdf_filename = filename 
+        # pdf_path = settings.BASE_DIR
+        # fullname = os.path.join(pdf_path, pdf_filename)
+        # if os.path.exists(fullname):
+        #     os.remove(fullname)
 
     except Exception as e:
-        print("In Exception",str(e))
+        print("Exception in send_pdf_mail: ",str(e))
         response = {
             'status_code':status.HTTP_400_BAD_REQUEST,
             'message':"Something went wrong!",

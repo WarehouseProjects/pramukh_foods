@@ -600,10 +600,10 @@ class CustomerListView(APIView):
             if store_name:
                 order_by_obj.append(store_name)
 
-            if request.user.user_type == 'SALESPERSON':
-                customer_qs = Customer.objects.filter(sales_person=request.user)
-            else:
+            if request.user.email == 'bhavik@krishivfoods.com' or request.user.user_type != 'SALESPERSON':
                 customer_qs = Customer.objects.all()
+            else:
+                customer_qs = Customer.objects.filter(sales_person=request.user)
 
             if order_by_obj:
                 customer_qs = customer_qs.order_by(*order_by_obj)
@@ -1370,6 +1370,8 @@ class OrderGetView(APIView):
             'creditmemo_list' :creditmemo_list,
             'order_date':order_obj.created_at.strftime("%Y-%m-%d"),
             'order_status':order_obj.status,
+            'payment_status':order_obj.payment_status,
+            'verfication_status':order_obj.verfication_status,
             'due_date':order_obj.due_date.strftime("%Y-%m-%d") if order_obj.due_date else None,
             'delivery_date':order_obj.delivery_date.strftime("%Y-%m-%d") if order_obj.delivery_date else None,
             'amount_received':order_obj.amount_recieved,
@@ -1827,9 +1829,52 @@ class InvoicePDF_url(viewsets.ViewSet):
             num_of_row_data  = pdfdata_res.get("num_of_row_data")
         
         # Creating PDF 
-        filename = 'file' + invoice_no + '.pdf' 
+        store_name = order_obj.customer.store_name.replace("(",'').replace(")",'')
+        store_name = store_name.replace(" ",'_')
+        filename = store_name + '_' + invoice_no + '.pdf' 
         createpdf_res = create_pdf(request = request,
                             pdf_type = "invoice_pdf",
+                            pdf_data = pdf_data,
+                            filename = filename,
+                            order_obj = order_obj,
+                            num_of_row_data = num_of_row_data,
+                        )
+        if createpdf_res["status_code"] != True:
+            return Response(pdfdata_res, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            data = {}
+            data['pdf_url'] = createpdf_res.get("pdf_url")
+
+        response = {'message':"PDF is retrieved successfully.", 'status':status.HTTP_200_OK, 'data': data}
+
+        return Response(response, status.HTTP_200_OK)
+
+class DeliverySheetPdf(viewsets.ViewSet):
+    def create(self,request,*args,**kwargs):        
+        invoice_no = request.data.get('invoice_no')
+        order_obj = Order.objects.filter(invoice_no=invoice_no).first()
+        
+        if not order_obj:
+            response = {
+                'status_code':status.HTTP_400_BAD_REQUEST,
+                'message':"Order ID is Invalid",
+                }
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        # Fetch PDF-Data
+        pdfdata_res = get_order_pdfdata(order_obj)
+        if pdfdata_res["status_code"] != True:
+            return Response(pdfdata_res, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            pdf_data = pdfdata_res.get("pdf_data")
+            num_of_row_data  = pdfdata_res.get("num_of_row_data")
+        
+        # Creating PDF 
+        store_name = order_obj.customer.store_name.replace("(",'').replace(")",'')
+        store_name = store_name.replace(" ",'_')
+        filename =  store_name + '_' + invoice_no + '_delivery' + '.pdf' 
+        createpdf_res = create_pdf(request = request,
+                            pdf_type = "delivery_sheet_pdf",
                             pdf_data = pdf_data,
                             filename = filename,
                             order_obj = order_obj,
@@ -2065,14 +2110,14 @@ class CreateOrderNew(viewsets.ViewSet):
                 OrderQuantity.objects.create(
                     product=product_obj,pack_size=packsize_obj,quantity = product['Count'],
                     discount=discount,price = price,net_price=net_price,product_amount=product_amount,order=order_obj,
-                    product_purchase_price = purchase_price)
+                    product_purchase_price = purchase_price,order_product_name=product['ProductName'])
                 # order_obj.amount+=product_amount
                 round_price=round(float(price),2)
                 
                 sum_of_weights+= product_obj.weight * float(product['Count']) if product_obj.weight else 0
                 sum_of_qty += float(product['Count']) if product['Count'] else 0
                 products_data_for_pdf.append({'product_id':product_obj.item_no,'category':product_obj.category,
-                                            'description':product_obj.name,'price':"%.2f" % round(net_price, 2),
+                                            'description':product['ProductName'],'price':"%.2f" % round(net_price, 2),
                                             'qty':int(product['Count']) if float(product['Count']).is_integer() else product['Count'],
                                             'scan_qty':'0','item_no':product_obj.item_no,
                                             'amount':"%.2f" % round(product_amount, 2),
@@ -2179,7 +2224,9 @@ class CreateOrderNew(viewsets.ViewSet):
                     pdf_data['rep'] = pdf_data['rep'] + data[1][0]
 
         # Creating PDF 
-        filename = 'salesorder'+str(order_obj.po_num) + '-'+ str(datetime.now().date()) + '.pdf'
+        store_name = order_obj.customer.store_name.replace("(",'').replace(")",'')
+        store_name = store_name.replace(" ",'_')
+        filename = store_name + '_' + str(order_obj.po_num) + '.pdf' 
         createpdf_res = create_pdf(request = request,
                             pdf_type = "sales_pdf",
                             pdf_data = pdf_data,
@@ -2334,15 +2381,14 @@ class CreateOrderNew(viewsets.ViewSet):
             OrderQuantity.objects.create(
                 product=product_obj,pack_size=packsize_obj,quantity = product['Count'],
                 discount=discount,price = price,net_price=net_price,product_amount=product_amount,order=verify_order,
-                product_purchase_price = purchase_price
-                )
+                product_purchase_price = purchase_price,order_product_name=product['ProductName'])
             # verify_order.amount+=product_amount
             round_price=round(float(price),2)
                 
             sum_of_weights+= product_obj.weight * float(product['Count']) if product_obj.weight else 0
             sum_of_qty += product['Count'] if product['Count'] else 0
             products_data_for_pdf.append({'product_id':product_obj.item_no,'category':product_obj.category,
-                                        'description':product_obj.name,'price':"%.2f" % round(net_price, 2),
+                                        'description':product['ProductName'],'price':"%.2f" % round(net_price, 2),
                                         'qty':int(product['Count']) if float(product['Count']).is_integer() else product['Count'],
                                         'scan_qty':'0','item_no':product_obj.item_no,
                                         'amount':"%.2f" % round(product_amount, 2),
@@ -2436,7 +2482,9 @@ class CreateOrderNew(viewsets.ViewSet):
         num_of_row_data = len(products_data_for_pdf)
         
         # Creating PDF 
-        filename = 'salesorder'+str(verify_order.po_num) + '-'+ str(datetime.now().date()) + '.pdf'
+        store_name = verify_order.customer.store_name.replace("(",'').replace(")",'')
+        store_name = store_name.replace(" ",'_')
+        filename = store_name + '_' + str(verify_order.po_num) + '.pdf' 
         createpdf_res = create_pdf(request = request,
                             pdf_type = "sales_pdf",
                             pdf_data = pdf_data,
@@ -2527,7 +2575,7 @@ class EditOrderAdmin(viewsets.ViewSet):
         OrderQuantity.objects.create(
             product=product_obj,pack_size=packsize_obj,quantity = quantity,
             discount=discount,price = price,net_price=net_price,order=order_obj,product_amount =product_amount,
-            product_purchase_price = purchase_price
+            product_purchase_price = purchase_price,order_product_name = product_obj.name
         )
         order_obj = Order.objects.filter(id=pk).first() #To Get updated value
         if order_obj.invoice_no:
@@ -2541,7 +2589,9 @@ class EditOrderAdmin(viewsets.ViewSet):
                 num_of_row_data  = pdfdata_res.get("num_of_row_data")
             
             # Creating PDF 
-            filename = 'file' + order_obj.invoice_no + '.pdf' 
+            store_name = order_obj.customer.store_name.replace("(",'').replace(")",'')
+            store_name = store_name.replace(" ",'_')
+            filename = store_name + '_' + order_obj.invoice_no + '.pdf' 
             createpdf_res = create_pdf(request = request,
                                 pdf_type = "invoice_pdf",
                                 pdf_data = pdf_data,
@@ -2566,7 +2616,9 @@ class EditOrderAdmin(viewsets.ViewSet):
                 num_of_row_data  = pdfdata_res.get("num_of_row_data")
             
             # Creating PDF 
-            filename =  'salesorder'+str(order_obj.po_num) + '-'+ str(datetime.now().date()) + '.pdf'
+            store_name = order_obj.customer.store_name.replace("(",'').replace(")",'')
+            store_name = store_name.replace(" ",'_')
+            filename = store_name + '_' + str(order_obj.po_num) + '.pdf' 
             createpdf_res = create_pdf(request = request,
                                 pdf_type = "sales_pdf",
                                 pdf_data = pdf_data,
@@ -2668,7 +2720,9 @@ class EditOrderAdmin(viewsets.ViewSet):
                 num_of_row_data  = pdfdata_res.get("num_of_row_data")
             
             # Creating PDF 
-            filename = 'file' + order_obj.invoice_no + '.pdf' 
+            store_name = order_obj.customer.store_name.replace("(",'').replace(")",'')
+            store_name = store_name.replace(" ",'_')
+            filename = store_name + '_' + order_obj.invoice_no + '.pdf'  
             createpdf_res = create_pdf(request = request,
                                 pdf_type = "invoice_pdf",
                                 pdf_data = pdf_data,
@@ -2692,7 +2746,9 @@ class EditOrderAdmin(viewsets.ViewSet):
                 num_of_row_data  = pdfdata_res.get("num_of_row_data")
             
             # Creating PDF 
-            filename =  'salesorder'+str(order_obj.po_num) + '-'+ str(datetime.now().date()) + '.pdf'
+            store_name = order_obj.customer.store_name.replace("(",'').replace(")",'')
+            store_name = store_name.replace(" ",'_')
+            filename = store_name + '_' + str(order_obj.po_num) + '.pdf' 
             createpdf_res = create_pdf(request = request,
                                 pdf_type = "sales_pdf",
                                 pdf_data = pdf_data,
@@ -2774,7 +2830,9 @@ class EditOrderAdmin(viewsets.ViewSet):
                 num_of_row_data  = pdfdata_res.get("num_of_row_data")
             
             # Creating PDF 
-            filename = 'file' + order_obj.invoice_no + '.pdf' 
+            store_name = order_obj.customer.store_name.replace("(",'').replace(")",'')
+            store_name = store_name.replace(" ",'_')
+            filename = store_name + '_' + order_obj.invoice_no + '.pdf' 
             createpdf_res = create_pdf(request = request,
                                 pdf_type = "invoice_pdf",
                                 pdf_data = pdf_data,
@@ -2798,7 +2856,9 @@ class EditOrderAdmin(viewsets.ViewSet):
                 num_of_row_data  = pdfdata_res.get("num_of_row_data")
             
             # Creating PDF 
-            filename =  'salesorder'+str(order_obj.po_num) + '-'+ str(datetime.now().date()) + '.pdf'
+            store_name = order_obj.customer.store_name.replace("(",'').replace(")",'')
+            store_name = store_name.replace(" ",'_')
+            filename = store_name + '_' + str(order_obj.po_num) + '.pdf' 
             createpdf_res = create_pdf(request = request,
                                 pdf_type = "sales_pdf",
                                 pdf_data = pdf_data,
@@ -2948,6 +3008,7 @@ class Average_sales_report(viewsets.ViewSet):
         From_Date = request.data.get('from_date')
         To_Date = request.data.get('to_date')
         product_id = request.data.get("product_id")
+        sales_user_id = request.data.get("sales_user_id")
         category_id = request.data.get("category_id")
         search_param = request.data.get("search_param")
         page = int(request.data.get('page',1))
@@ -3030,10 +3091,14 @@ class Average_sales_report(viewsets.ViewSet):
                 to_date_obj = to_date_obj + d #adding 1 day
                 product_orders = product_orders.filter(created_at__range=(from_date_obj,to_date_obj))
             
+            if sales_user_id:
+                product_orders = product_orders.filter(order__ordered_by=sales_user_id)
+
             sum_of_quanity = product_orders.aggregate(Sum("quantity"))['quantity__sum']
-            order_product_sales_price = 0
-            for order_obj in product_orders:
-                order_product_sales_price += order_obj.quantity * order_obj.price
+            order_product_sales_price = product_orders.aggregate(Sum("product_amount"))['product_amount__sum']
+            # order_product_sales_price = 0
+            # for order_obj in product_orders:
+            #     order_product_sales_price += order_obj.quantity * order_obj.price
 
             y_axis.append(x.name)
             if sum_of_quanity and product_orders:
@@ -3044,17 +3109,18 @@ class Average_sales_report(viewsets.ViewSet):
                 average = 0
                 x_axis.append(average)
 
-            data.append({
-                'product_id':x.id,
-                'name':x.name,
-                'product_item_no':x.item_no,
-                'order_quanity_recieved':sum_of_quanity if sum_of_quanity else 0,
-                'average': average,
-                'category_id': x.category.id,
-                'category_name': x.category.name,
+            if sum_of_quanity and sum_of_quanity > 0:
+                data.append({
+                    'product_id':x.id,
+                    'name':x.name,
+                    'product_item_no':x.item_no,
+                    'order_quanity_recieved':sum_of_quanity if sum_of_quanity else 0,
+                    'average': average,
+                    'category_id': x.category.id,
+                    'category_name': x.category.name,
 
 
-            })
+                })
 
         total_record = len(data)
         list_with_pagelimit = data[start:end]
@@ -3220,6 +3286,8 @@ class Average_sales_report(viewsets.ViewSet):
         from_date = request.data.get('from_date')
         to_date = request.data.get('to_date')
         store_id = request.data.get("store_id")
+        sales_user_id = request.data.get("sales_user_id")
+
         # Pagination
         page = int(request.data.get('page',1))
         limit = int(request.data.get('limit',10))
@@ -3282,7 +3350,7 @@ class Average_sales_report(viewsets.ViewSet):
             order_by = order_by
 
         product_orders = OrderQuantity.objects.filter(product=product_obj) # Main query
-        
+
         if from_date and to_date:
             try:
                 from_date_obj = datetime.strptime(from_date,'%Y-%m-%d')
@@ -3309,6 +3377,9 @@ class Average_sales_report(viewsets.ViewSet):
                 return Response(response, status=status.HTTP_404_NOT_FOUND)
        
             product_orders = product_orders.filter(order__customer=store_obj)
+        
+        if sales_user_id:
+            product_orders = product_orders.filter(order__ordered_by=sales_user_id)
 
         product_orders = product_orders.order_by(order_by)
         total_record = len(product_orders)
@@ -3553,16 +3624,10 @@ class SalesUserOrderList(APIView):
             if search_param:
                 
                 filter_data_qs = order_qs.filter(Q(invoice_no__icontains = search_param) |
-                                                    Q(detail__icontains = search_param)|
-                                                    Q(created_at__icontains=search_param)|
-                                                    Q(due_date__icontains=search_param)|
-                                                    Q(amount__icontains=search_param)|
-                                                    Q(amount_recieved__icontains=search_param)|
-                                                    Q(remaining_amount__icontains=search_param)|
-                                                    Q(payment_status__icontains=search_param)|
-                                                    Q(status__icontains =search_param)|
-                                                    Q(payment_status__icontains=search_param)|
-                                                    Q(ordered_by__full_name__icontains=search_param))
+                                                Q(po_num__icontains = search_param)|
+                                                Q(customer__full_name__icontains=search_param) |
+                                                Q(customer__store_name__icontains=search_param))
+
                 total_record = len(filter_data_qs)
                 list_with_pagelimit = filter_data_qs[start:end]
                 filter_record = len(list_with_pagelimit)
@@ -3912,15 +3977,15 @@ class AdminAgeingReport(APIView):
         # Data fetch - Main Condition
         today = datetime.now().date()
          # order_qs = Order.objects.filter(due_date__lt=today,remaining_amount__gt=0.0).order_by(order_by)
-        order_qs = Order.objects.filter(payment_status__in = ['PARTIAL','NOT_PAID'],remaining_amount__gt=0.0).order_by(order_by)
-
+        # order_qs = Order.objects.filter(payment_status__in = ['PARTIAL','NOT_PAID'],remaining_amount__gt=0.0).order_by(order_by)
+        order_qs = Order.objects.filter(remaining_amount__gt=0.0).order_by(order_by)
         # Refreshing data to get aging-value
         for obj in order_qs:
             old_data = obj.term
             obj.term = old_data
             obj.save()
 
-        order_qs = order_qs.exclude(ageing__lt = 1)
+        # order_qs = order_qs.exclude(ageing__lt = 1)
         # filtering data
         if from_order_date and to_order_date:
             try:
@@ -3969,6 +4034,7 @@ class AdminAgeingReport(APIView):
                                         Q(amount_recieved__icontains=search_value)|
                                         Q(ordered_by__full_name__icontains=search_value)|
                                         Q(customer__full_name__icontains=search_value) |
+                                        Q(customer__store_name__icontains=search_value) |
                                         Q(remaining_amount__icontains=search_value) |
                                         Q(ageing__icontains=search_value)
 
@@ -4435,15 +4501,22 @@ class ScanAllproducts(APIView):
 
         for order_quantity in order_quantity_qs:
             quantity_to_scan = order_quantity.remaining_scan_quantity
-            product_obj = Product.objects.filter(id=order_quantity.product.id).first()
+            product_obj = Product.objects.get(id=order_quantity.product.id)
             if quantity_to_scan <= product_obj.available_quantity:
                 try:
                     order_quantity.scan_status = 'SCANNED'
                     order_quantity.scan_quantity +=  quantity_to_scan
                     product_obj.available_quantity -= quantity_to_scan 
                     order_quantity.remaining_scan_quantity -= quantity_to_scan
-                    product_obj.save()
-                    order_quantity.save()
+                    
+                    # product_obj.save()
+                    # order_quantity.save()
+                    Product.objects.filter(id=product_obj.id).update(available_quantity = product_obj.available_quantity) 
+                    OrderQuantity.objects.filter(id=order_quantity.id).update(           
+                        scan_status = 'SCANNED',
+                        scan_quantity = order_quantity.scan_quantity,
+                        remaining_scan_quantity = order_quantity.remaining_scan_quantity 
+                        )
 
                     response = {
                         'status_code':status.HTTP_200_OK,
@@ -4451,15 +4524,20 @@ class ScanAllproducts(APIView):
                     }
 
                     if product_obj.available_quantity <= product_obj.low_stock_qauntity:
-                        product_obj.low_stock = True
+                        # product_obj.low_stock = True
+                        # product_obj.save()
+                        Product.objects.filter(id=product_obj.id).update(low_stock = True) 
                     
                     if product_obj.available_quantity == 0:
-                        product_obj.in_stock = False
+                        # product_obj.in_stock = False
+                        # product_obj.save()
+                        Product.objects.filter(id=product_obj.id).update(in_stock = False) 
 
-                    product_obj.save()
+
                     if order_quantity.scan_quantity != order_quantity.quantity:
-                        order_quantity.scan_status = 'PARTIALLY_SCANNED'
-                        order_quantity.save()
+                        # order_quantity.scan_status = 'PARTIALLY_SCANNED'
+                        # order_quantity.save()
+                        OrderQuantity.objects.filter(id=order_quantity.id).update(scan_status = 'PARTIALLY_SCANNED') 
                         response.update({
                             'data': {
                                 'remaining_quanity':'{0} Packets Scanning left'.format(order_quantity.quantity - order_quantity.scan_quantity)
@@ -4477,21 +4555,31 @@ class ScanAllproducts(APIView):
                 new_scanned_quantity = product_obj.available_quantity
                 order_quantity.scan_quantity += new_scanned_quantity
                 order_quantity.remaining_scan_quantity -= new_scanned_quantity
-                order_quantity.scan_status = 'PARTIALLY_SCANNED'
-                order_quantity.save()
+                # order_quantity.scan_status = 'PARTIALLY_SCANNED'
+                # order_quantity.save()
+                OrderQuantity.objects.filter(id=order_quantity.id).update(           
+                        scan_status = 'PARTIALLY_SCANNED',
+                        scan_quantity = order_quantity.scan_quantity,
+                        remaining_scan_quantity = order_quantity.remaining_scan_quantity 
+                        )
                 product_obj.available_quantity -= new_scanned_quantity
+                Product.objects.filter(id=product_obj.id).update(available_quantity = product_obj.available_quantity) 
                 response = None
                 
                 
                 if product_obj.available_quantity <= product_obj.low_stock_qauntity:
-                    product_obj.low_stock = True
+                    # product_obj.low_stock = True
+                    # product_obj.save()
+                    Product.objects.filter(id=product_obj.id).update(low_stock = True) 
                     response = {
                         'status_code':status.HTTP_200_OK,
                         'message' : "Inform Admin About Low Stock",
                     }
 
                 if product_obj.available_quantity == 0:
-                    product_obj.in_stock = False
+                    # product_obj.in_stock = False
+                    # product_obj.save()
+                    Product.objects.filter(id=product_obj.id).update(in_stock = False) 
                     response = {
                         'status_code':status.HTTP_200_OK,
                         'message' : "Inform Admin About Out of Stock",
@@ -4501,7 +4589,7 @@ class ScanAllproducts(APIView):
                         'status_code':status.HTTP_200_OK,
                         'message' : "Product scanned Partially",
                         }
-                product_obj.save()
+                
                 response.update({
                     'data': {
                         'remaining_quanity':'{0} Packets Scanning left'.format(order_quantity.quantity - order_quantity.scan_quantity)
@@ -4544,10 +4632,15 @@ class VerficationScanAllproducts(APIView):
         for order_quantity in order_quantity_qs:
             quantity_to_scan = order_quantity.remaining_verfication_scan_quantity
              
-            order_quantity.verfication_scan_status = 'SCANNED'
+            # order_quantity.verfication_scan_status = 'SCANNED'
             order_quantity.verfication_scan_quantity +=  quantity_to_scan
             order_quantity.remaining_verfication_scan_quantity -= quantity_to_scan
-            order_quantity.save()
+            # order_quantity.save()
+            OrderQuantity.objects.filter(id=order_quantity.id).update(           
+                        verfication_scan_status = 'SCANNED',
+                        verfication_scan_quantity = order_quantity.verfication_scan_quantity,
+                        remaining_verfication_scan_quantity = order_quantity.remaining_verfication_scan_quantity 
+                        )
 
         response = {
                         'status_code':status.HTTP_200_OK,

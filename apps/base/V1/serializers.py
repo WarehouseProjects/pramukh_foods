@@ -209,7 +209,7 @@ class OrderDetailSerializers(serializers.ModelSerializer):
         search_param = extra_data.get('search_param')
         start = extra_data.get('start')
         end = extra_data.get('end')
-        ordered_by = '-id'
+        ordered_by = None
         data_list = [] 
         if "for_app" not in extra_data:
             if extra_data['sort_type'] == 'asc':
@@ -222,18 +222,18 @@ class OrderDetailSerializers(serializers.ModelSerializer):
                                                 Q(product__name__icontains=search_param) |
                                                 Q(product__item_no__icontains=search_param) |
                                                 Q(product__category__name__icontains=search_param) |
-                                                Q(quantity__icontains=search_param))\
-                .order_by(ordered_by)
-            self.total_record = qs.count()
-            # qs = qs.order_by('product__category__name','order_product_name')
-            qs = qs[start:end]
-            self.filter_record = qs.count()
+                                                Q(quantity__icontains=search_param))
         else:
-            qs = obj.order_quantities.all().order_by(ordered_by)
-            self.total_record = qs.count()
-            # qs = qs.order_by('product__category__name','order_product_name')
-            qs = qs[start:end]
-            self.filter_record = qs.count()
+            qs = obj.order_quantities.all()
+            
+        if ordered_by:
+            qs = qs.order_by(ordered_by)
+        else:
+            qs = qs.order_by('product__category__name','order_product_name')
+
+        self.total_record = qs.count()
+        qs = qs[start:end]
+        self.filter_record = qs.count() 
         if obj.status != 'COMPLETED':
             for product in qs:
                 scan_text = None
@@ -1058,7 +1058,7 @@ class AgeingReportNewSerializers(serializers.ModelSerializer):
 
     class Meta:
         model= Order
-        fields=['id','invoice_no','po_num','term','store_name','due_date','created_at','delivery_date','customer_name','customer_id','ageing','total_amount','amount_recieved','open_balance']
+        fields=['id','invoice_no','po_num','term','store_name','due_date','created_at','delivery_date','invoice_date','customer_name','customer_id','ageing','total_amount','amount_recieved','open_balance']
     
     def get_store_name(self,obj):
         return obj.customer.store_name
@@ -1165,10 +1165,10 @@ class ProductOrdersSerializers(serializers.ModelSerializer):
     product_original_name = serializers.CharField(source='product.name')   
     product_item_no = serializers.CharField(source='product.item_no')
     product_description = serializers.CharField(source='product.description')
-    product_original_price = serializers.CharField(source='product.sale_price')
+    product_original_price = serializers.CharField(source='price')
     
     product_order_quantity = serializers.CharField(source='quantity')
-    product_order_sales_price = serializers.CharField(source='price')
+    product_order_sales_price = serializers.CharField(source='net_price')
     product_order_discount = serializers.CharField(source='discount')
     total_of_amount = serializers.CharField(source='product_amount') 
 
@@ -1250,6 +1250,12 @@ class PaymentStatementSerializers(serializers.ModelSerializer):
 
     def get_transaction_data(self,obj):
         value = "PMT"
+        if obj.method == 'CASH':
+            value = value + "-" + "Cash"
+        elif obj.method == 'CHECK':
+            value = value + "-" + "Check" + "-" + str(obj.reference_no)
+        if obj.order:
+            value = value + "-#" + str(obj.order.invoice_no)
         return value
     
     def get_transaction_date(self,obj):
@@ -1303,3 +1309,21 @@ class SalesStoreCreditsSerializers(serializers.ModelSerializer):
             }
             value.append(data)
         return value
+
+class ProductExcelSerializers(serializers.ModelSerializer):
+    category_name = serializers.SerializerMethodField()
+    purchase_price_of_qty = serializers.SerializerMethodField()
+    selling_price_of_qty = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = ["item_no","category_name","name","available_quantity","purchase_cost","sale_price","purchase_price_of_qty","selling_price_of_qty"]
+
+    def get_category_name(self,obj):
+        return obj.category.name
+    
+    def get_purchase_price_of_qty(self,obj):
+        return obj.available_quantity * obj.purchase_cost
+    
+    def get_selling_price_of_qty(self,obj):
+        return obj.available_quantity * obj.sale_price

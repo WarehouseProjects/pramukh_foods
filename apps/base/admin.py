@@ -16,11 +16,16 @@ for model_name, model in app.models.items():
         continue
     elif model_name == 'creditapplied':
         continue
+    elif model_name == 'token':
+        continue
+    elif model_name == 'inventorymonthlydata':
+        continue
     else:
         admin.site.register(model)
 
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'po_num','invoice_no','amount','amount_recieved','due_date','delivery_date','created_at')
+    search_fields = ['id','po_num','invoice_no']
 
 class OrderQuantityAdmin(admin.ModelAdmin):
     list_display = ('id', 'order','order_product_name','quantity','scan_quantity','remaining_scan_quantity','remaining_verfication_scan_quantity','created_at')
@@ -37,11 +42,21 @@ class CreditMemoAdmin(admin.ModelAdmin):
 class CreditAppliedAdmin(admin.ModelAdmin):
     list_display = ('id', 'credit_memo','credit_applied_order','applied_amount','created_at')
 
+class TokenAdmin(admin.ModelAdmin):
+    list_display = ('key', 'user')
+
+class InventoryMonthlyDataAdmin(admin.ModelAdmin):
+    list_display = ('id', 'created_at')
+
 admin.site.register(OrderQuantity, OrderQuantityAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(AdjustProduct, AdjustProductAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(CreditMemo, CreditMemoAdmin)
 admin.site.register(CreditApplied, CreditAppliedAdmin)
+admin.site.register(Token, TokenAdmin)
+admin.site.register(InventoryMonthlyData, InventoryMonthlyDataAdmin)
+
+
 
 

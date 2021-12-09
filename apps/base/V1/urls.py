@@ -62,11 +62,11 @@ router.register('notifications',Notifications,"notifications")
 router.register('invoice_pdf',InvoicePDF,"invoicePDF")
 router.register('invoice_pdf_url',InvoicePDF_url,"invoicePDF_url")
 router.register('creditmemo_pdf_url',CreditMemoPDF,"creditmemo-pdf-url")
-
+router.register('delivery_sheet_pdf_url',DeliverySheetPdf,"delivery-sheet-pdf-url")
 
 router.register('average_sales_report',Average_sales_report,"average_sales_report")
 router.register('average_onhand_product_report',average_onhand_product,"average-onhand-product-report")
-router.register('credit_memo',Credit_Memo,"credit-memo")
+router.register('credit_memo',CreditMemoView,"credit-memo")
 router.register('customer_statement',CustomerStatementView,"customer-statement")
 
 urlpatterns = [

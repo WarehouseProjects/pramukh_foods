@@ -456,7 +456,7 @@ class OrderQuantity(models.Model):
         if not self.pk:
             self.remaining_scan_quantity = self.quantity
             self.remaining_verfication_scan_quantity = self.quantity            
-            self.order_product_name = self.product.name    
+            # self.order_product_name = self.product.name    
         else:
             self.remaining_scan_quantity = float(self.quantity) - float(self.scan_quantity)  
             self.remaining_verfication_scan_quantity = float(self.quantity) - float(self.verfication_scan_quantity)  
@@ -552,6 +552,8 @@ class Order(models.Model):
     delivered_status = models.BooleanField(default=False)
     invoice_pdf = models.FileField(upload_to='pdf/',null=True,blank=True)
     sales_pdf = models.FileField(upload_to='pdf/',null=True,blank=True)
+    delivery_sheet_pdf = models.FileField(upload_to='pdf/',null=True,blank=True)
+
 
     verified_by = models.ForeignKey(
         User,
@@ -565,7 +567,7 @@ class Order(models.Model):
             self.po_num = self.generate_po_num()
         
         self.remaining_amount = 0 if (float(self.amount) - float(self.amount_recieved))<0 else (float(self.amount) - float(self.amount_recieved))
-
+        self.remaining_amount = round(float(self.remaining_amount), 2)
         if self.delivery_date and self.term:
             start = self.term.find(' ')
             extra_day = self.term[start+1:]
@@ -678,3 +680,10 @@ class CreditApplied(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+class InventoryMonthlyData(models.Model):
+    inventory_excel_file = models.FileField(upload_to='excel_files/',null=True,blank=True)
+    created_at = models.DateTimeField(auto_now_add=True,null=True)
+
+    def __str__(self):
+        return str(self.created_at)

@@ -504,8 +504,6 @@ class AdjustProductViewset(ViewSet):
         product_id = request.data.get('product_id')
         new_selling_price = request.data.get('new_selling_price')
         new_purchase_price = request.data.get('new_purchase_price')
-
-        date = request.data.get('date')
         new_quantity = request.data.get('quantity')
         notes = request.data.get('notes')
 
@@ -558,19 +556,19 @@ class AdjustProductViewset(ViewSet):
 
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            date_obj = datetime.strptime(date,"%Y-%m-%d")
-        except:
-            response = {
-                'status_code':status.HTTP_400_BAD_REQUEST,
-                'message':'date must be in YY-MM-DD format',
-                }
+        # try:
+        #     date_obj = datetime.strptime(date,"%Y-%m-%d")
+        # except:
+        #     response = {
+        #         'status_code':status.HTTP_400_BAD_REQUEST,
+        #         'message':'date must be in YY-MM-DD format',
+        #         }
 
-            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        #     return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
         data_qs = AdjustProduct.objects.filter(product=product)
         response = {}
-
+        date_obj = timezone.now().date()
         if not data_qs: #first entry created from product-creations
             new = AdjustProduct.objects.create(product=product)
             new.notes = notes
@@ -673,7 +671,6 @@ class AdjustProductViewset(ViewSet):
         limit = int(request.data.get('limit',10))
         start = (page - 1) * limit
         end = start + limit
-        
         product__name = request.data.get('product__name')
         product__item_no = request.data.get('product__item_no')
         initial_quanity_date = request.data.get('initial_quanity_date')
@@ -719,7 +716,6 @@ class AdjustProductViewset(ViewSet):
         
         get_not_adjusted_product = AdjustProduct.objects.filter(date__exact=None).values_list('product',flat=True)
         objects = AdjustProduct.objects.exclude(product__in=get_not_adjusted_product)
-
         if order_by_obj:
             objects = objects.all().order_by(*order_by_obj)
         else:    
@@ -1041,27 +1037,23 @@ class CustomerStatementView(ViewSet):
                     balance_data.append(new_balance)
             
             for data,bal_data in zip(serializer_data,balance_data):
-                data['balance'] = bal_data
+                data['balance'] = "${:,.2f}".format(bal_data) 
+                data['amount'] = "${:,.2f}".format(data['amount']) 
 
+        serializer_data = serializer_data
         num_of_row_data = len(serializer_data)
         
         # Getting extra row needs to add in last page of PDF 
-        total_page_rows = num_of_row_data + (25 - num_of_row_data) % 25
+        num_of_row_data = num_of_row_data + 3
+        total_page_rows = num_of_row_data + (28 - num_of_row_data) % 28
         extra_rows = total_page_rows - num_of_row_data
 
-        if extra_rows == 1:
-            extra_rows = 0
-        if num_of_row_data > 28:
-            data = num_of_row_data - 28
-            extra_rows = extra_rows + data
-        elif num_of_row_data == 28:
-            extra_rows = 25
-        if num_of_row_data == 24:
-            extra_rows += 1
-        if num_of_row_data == 26:
+        if extra_rows == 27:
             extra_rows = 2
-        if num_of_row_data == 27:
+        elif extra_rows == 26:
             extra_rows = 1
+        elif extra_rows == 25:
+            extra_rows = 0
 
         pdf_data = {
             'row_data' : serializer_data,
@@ -1069,8 +1061,8 @@ class CustomerStatementView(ViewSet):
         }
 
         # PDF Total section
-        pdf_data['current_total']= balance_data[-1] if len(balance_data) > 0 else 0
-        
+        value = balance_data[-1] if len(balance_data) > 0 else 0
+        pdf_data['current_total']= "${:,.2f}".format(value) 
         current_date = datetime.now().date()
         date_for_30days = current_date - timedelta(days=30)
         date_for_31days = date_for_30days - timedelta(days=1)
@@ -1078,12 +1070,14 @@ class CustomerStatementView(ViewSet):
         date_for_61days = date_for_60days - timedelta(days=1)
         date_for_90days = current_date - timedelta(days=90)
 
-        order_qs = order_qs.filter(payment_status__in = ['PARTIAL','NOT_PAID']) # Get unpaid Orders to get Days
+        order_qs = order_qs.filter(payment_status__in = ['PARTIAL','NOT_PAID'],remaining_amount__gt=0.10) # Get unpaid Orders to get Days
         pdf_data['days_30'] = order_qs.filter(due_date__range=(date_for_30days,current_date)).count()
         pdf_data['days_60'] = order_qs.filter(due_date__range=(date_for_60days,date_for_31days)).count()
         pdf_data['days_90'] = order_qs.filter(due_date__range=(date_for_90days,date_for_61days)).count()
         pdf_data['over_days90'] = order_qs.filter(due_date__lt = date_for_90days).count()
         pdf_data['current_date']= current_date
+        pdf_data['from_date']= from_date_obj
+        pdf_data['to_date']= to_date_obj
 
         pdf_data['store_name']= customer_obj.store_name
         pdf_data['customer_name']= customer_obj.full_name

@@ -145,11 +145,11 @@
     <table width="45%" style="border-bottom: 1pt;">
         {% for row in row_data %}
             <tr>
-                <td width="21%" class="leftBorderOnly rightBorderOnly" style="text-align: left;padding-left: 3px;padding-bottom: 0px;padding-top: 0.8px;font-size: 13px;height: 22px;">{{row.order_number}}</td>
-                <td class="leftBorderOnly rightBorderOnly" style="width: 55%;padding-left: 3px;font-size: 13px;max-width:200px; min-width:200px;padding-bottom: 0px;padding-top: 0.8px;height:22px;">
+                <td width="21%" class="leftBorderOnly rightBorderOnly" style="text-align: left;padding-left: 3px;padding-bottom: 0px;padding-top: 0.8px;font-size: 13px;height: 44px;">{{row.order_number}}</td>
+                <td class="leftBorderOnly rightBorderOnly" style="width: 55%;padding-left: 3px;font-size: 13px;max-width:200px; min-width:200px;padding-bottom: 0px;padding-top: 0.8px;height:44px;">
                     <div style="overflow: hidden;">{{row.description}}</div>
                 </td>
-                <td width="25.5%" class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 0px;font-size: 13px;height: 22px;padding-left: 3px;padding-bottom: 0px;padding-top: 0.8px;">${{row.amount}}</td>
+                <td width="25.5%" class="leftBorderOnly rightBorderOnly" style="text-align: left;padding: 0px;font-size: 13px;height: 44px;padding-left: 3px;padding-bottom: 0px;padding-top: 0.8px;">${{row.amount}}</td>
             </tr>
         {% endfor %}
         {% for i in loop_times %} 
