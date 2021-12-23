@@ -594,7 +594,7 @@ class Order(models.Model):
             last_id = last_id.split("O")[1]
             new_po_num = int(last_id)+1
         else:
-            new_po_num = 2300
+            new_po_num = 101
         new_po_num = "PO"+str(new_po_num)
         return str(new_po_num)
 

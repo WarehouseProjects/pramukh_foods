@@ -600,10 +600,10 @@ class CustomerListView(APIView):
             if store_name:
                 order_by_obj.append(store_name)
 
-            if request.user.email == 'bhavik@krishivfoods.com' or request.user.user_type != 'SALESPERSON':
-                customer_qs = Customer.objects.all()
-            else:
-                customer_qs = Customer.objects.filter(sales_person=request.user)
+            # if request.user.email == 'bhavik@' or request.user.user_type != 'SALESPERSON':
+            #     customer_qs = Customer.objects.all()
+            # else:
+            customer_qs = Customer.objects.filter(sales_person=request.user)
 
             if order_by_obj:
                 customer_qs = customer_qs.order_by(*order_by_obj)
@@ -1676,15 +1676,15 @@ class ScanOrder(viewsets.ViewSet):
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
         if not order_obj.invoice_no:
-            kpo_number_qs = Order.objects.filter(invoice_no__startswith='KPO').order_by('invoice_no')
-            next_kpo_num = 0
-            if len(kpo_number_qs) == 0:
-                next_kpo_num = 'KPO' + str(2300)
+            inv_number_qs = Order.objects.filter(invoice_no__startswith='INV').order_by('invoice_no')
+            next_inv_num = 0
+            if len(inv_number_qs) == 0:
+                next_inv_num = 'INV' + str(701)
             else:
-                last_kpo_number = kpo_number_qs.last()
-                new_num = int(last_kpo_number.invoice_no[3:]) + 1
-                next_kpo_num = 'KPO' + str(new_num)
-            order_obj.invoice_no = next_kpo_num
+                last_inv_number = inv_number_qs.last()
+                new_num = int(last_inv_number.invoice_no[3:]) + 1
+                next_inv_num = 'INV' + str(new_num)
+            order_obj.invoice_no = next_inv_num
             order_obj.invoice_date = datetime.now().date()
 
         order_obj.verfication_status = True

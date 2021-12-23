@@ -2264,9 +2264,9 @@ class AddUpdatePaymentHistory(APIView):
                 if data_dict[order.id]["payment_status"] == "over":
                     previous_obj = CreditMemo.objects.all().last()
                     if previous_obj:
-                        new_cm_no =  "KFCM - " + str(int(previous_obj.cm_no[6:]) + 1)
+                        new_cm_no =  "CM - " + str(int(previous_obj.cm_no[4:]) + 1)
                     else:
-                        new_cm_no = 'KFCM - 01'
+                        new_cm_no = 'CM - 501'
 
                     credit_amount = data_dict[order.id]["payment_amount"] - data_dict[order.id]["open_balance"]
                     creditmemo_obj = CreditMemo.objects.create(
@@ -2506,9 +2506,9 @@ class CreditMemoView(ViewSet):
         #     new_cm_no = 'CM_1'
 
         if previous_obj:
-            new_cm_no =  "KFCM - " + str(int(previous_obj.cm_no[6:]) + 1)
+            new_cm_no =  "CM - " + str(int(previous_obj.cm_no[4:]) + 1)
         else:
-            new_cm_no = 'KFCM - 1'
+            new_cm_no = 'CM - 501'
 
         creditmemo_obj = CreditMemo.objects.create(
                                             cm_no = new_cm_no,

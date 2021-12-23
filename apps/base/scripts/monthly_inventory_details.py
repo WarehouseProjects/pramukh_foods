@@ -64,7 +64,7 @@ def run():
         # Log in to server using secure context and send email
         email_form =  settings.EMAIL_HOST_USER
         password = settings.EMAIL_HOST_PASSWORD
-        recipient_list = 'krishivfoods2019@gmail.com'
+        recipient_list = 'pramukhfoodsus@gmail.com'
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
             server.login(email_form, password)
