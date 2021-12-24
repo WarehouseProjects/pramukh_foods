@@ -601,9 +601,10 @@ class CustomerListView(APIView):
                 order_by_obj.append(store_name)
 
             # if request.user.email == 'bhavik@' or request.user.user_type != 'SALESPERSON':
-            #     customer_qs = Customer.objects.all()
-            # else:
-            customer_qs = Customer.objects.filter(sales_person=request.user)
+            if request.user.user_type != 'SALESPERSON':
+                customer_qs = Customer.objects.all()
+            else:
+                customer_qs = Customer.objects.filter(sales_person=request.user)
 
             if order_by_obj:
                 customer_qs = customer_qs.order_by(*order_by_obj)
